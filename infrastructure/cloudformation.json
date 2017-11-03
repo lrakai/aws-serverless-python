@@ -15,17 +15,17 @@
             "SubnetA": {
                 "CIDR": "10.0.0.0/24",
                 "AZ": "us-west-2a"
-            },
-        "UserConfig": {
-            "Login": {
-                "Name": "student",
-                "Pass": "password"
             }
-        }
         },
         "Ec2InstanceConfig": {
             "Metadata": {
                 "InstanceName": "Dev Instance"
+            }
+        },
+        "UserConfig": {
+            "Login": {
+                "Name": "student",
+                "Pass": "password"
             }
         }
     },
@@ -43,8 +43,8 @@
                 "IamInstanceProfile": {
                     "Ref": "Ec2InstanceProfile"
                 },
-                "ImageId": "ami-4836a428",
-                "InstanceType": "t2.micro",
+                "ImageId": "ami-6e1a0117",
+                "InstanceType": "t2.medium",
                 "KeyName": {
                     "Ref": "AWS::AccountId"
                 },
@@ -74,62 +74,45 @@
                             "",
                             [
                                 "#!/bin/bash -xe\n",
-                                "yum -y install git\n",
-                                "mkdir /home/ec2-user/iot\n",
-                                "virtualenv /home/ec2-user/iot\n",
-                                "mkdir /home/ec2-user/iot/certs\n",
-                                "wget https://www.symantec.com/content/en/us/enterprise/verisign/roots/VeriSign-Class%203-Public-Primary-Certification-Authority-G5.pem -O /home/ec2-user/iot/certs/root.pem\n",
-                                "source /home/ec2-user/iot/bin/activate\n",
-                                "pip install AWSIoTPythonSDK\n",
-                                "deactivate\n",
-                                "git clone https://github.com/cloudacademy/aws-iot-device-sim.git /home/ec2-user/iot/aws-iot-device-sim\n",
-                                "echo '#!/bin/bash\n",
-                                "source /home/ec2-user/iot/bin/activate\n",
-                                "python /home/ec2-user/iot/aws-iot-device-sim/scripts/fireSprinkler.py \"${@:1}\"\n",
-                                "deactivate' > /home/ec2-user/iot/fireSprinkler.sh\n",
-                                "chmod ugo+x /home/ec2-user/iot/fireSprinkler.sh\n",
-                                "echo '#!/bin/bash\n",
-                                "source /home/ec2-user/iot/bin/activate\n",
-                                "python /home/ec2-user/iot/aws-iot-device-sim/scripts/airConditioning.py \"${@:1}\"\n",
-                                "deactivate' > /home/ec2-user/iot/airConditioning.sh\n",
-                                "chmod ugo+x /home/ec2-user/iot/airConditioning.sh\n",
-								"chown -R ec2-user:ec2-user /home/ec2-user\n"
+                                "apt-get install git -y\n",
+								"cd /tmp/\n",
+								"git clone https://github.com/lrakai/ca-python-serverless\n",
+								"cd ca-python-serverless\n",
+								"git checkout -b lab\n",
+								"git pull origin lab\n",
+								"cd ..\n",
+								"tar -cf ca-python-serverless.tar --exclude \\.git* ca-python-serverless\n",
+								"tar -xf ca-python-serverless.tar -C /home/ubuntu/\n",
+								"add-apt-repository ppa:jonathonf/python-3.6 --yes\n",
+								"apt-get update\n",
+								"apt-get install -y python3.6 python3.6-dev libssl-dev \n",
+								"apt-get install -y python3-pip virtualenv zip\n",
+								"mkdir -p /app_files\n",
+								"cd /app_files\n",
+								"virtualenv -p /usr/bin/python3.6 venv\n",
+								"source /app_files/venv/bin/activate\n",
+								"pip install moto\n",
+								"pip install moto[server]\n",
+								"pip install -r requirements.txt\n",
+								"source /app_files/venv/bin/activate\n",
+								"pip install awscli\n",
+								"mkdir -p /home/ubuntu/.aws\n",
+								"ln -s /app_files/credentials /home/ubuntu/.aws/\n",
+								"echo \"source /app_files/venv/bin/activate\" | sudo tee -a /etc/profile\n",
+								"grep -q -F 'PYTHONPATH=\"/app_files:$PYTHONPATH\"' /etc/environment || echo 'PYTHONPATH=\"/app_files:$PYTHONPATH\"' | sudo tee -a /etc/environment\n",
+								"cd ~\n",
+								"wget https://github.com/awslabs/aws-sam-local/releases/download/v0.2.2/sam_0.2.2_linux_amd64.deb\n",
+								"dpkg -i sam_0.2.2_linux_amd64.deb\n",
+								"apt-get -f install\n",
+								"curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -\n",
+								"add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"\n",
+								"apt-get update\n",
+								"apt-cache policy docker-ce\n",
+								"apt-get install -y docker-ce\n"
                             ]
                         ]
                     }
                 }
-            }
-        },
-        "IotRepublishRole": {
-            "Type": "AWS::IAM::Role",
-            "Properties": {
-                "AssumeRolePolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {
-                                "Service": "iot.amazonaws.com"
-                            },
-                            "Action": "sts:AssumeRole"
-                        }
-                    ]
-                },
-                "Path": "/",
-                "Policies": [
-                    {
-                        "PolicyName": "iot-publish",
-                        "PolicyDocument": {
-                            "Version": "2012-10-17",
-                            "Statement": {
-                                "Effect": "Allow",
-                                "Action": "iot:Publish",
-                                "Resource": "arn:aws:iot:us-west-2:*:topic/office/kitchen/alarm"
-                            }
-                        }
-                    }
-                ],
-                "RoleName": "iot-republish-role"
             }
         },
         "Ec2Role": {
@@ -281,7 +264,7 @@
         "Ec2SecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "ssh only",
+                "GroupDescription": "Development",
                 "VpcId": {
                     "Ref": "VPC"
                 },
@@ -291,8 +274,125 @@
                         "FromPort": "22",
                         "ToPort": "22",
                         "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "3000",
+                        "ToPort": "3000",
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8080",
+                        "ToPort": "8080",
+                        "CidrIp": "0.0.0.0/0"
                     }
                 ]
+            }
+        },
+        "Group": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "GroupName": "Students",
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "students-policy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "ec2:Describe*",
+                                        "ec2:List*"
+                                    ],
+                                    "Resource": "*",
+                                    "Effect": "Allow",
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "ec2:Region": "us-west-2"
+                                        }
+                                    }
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:*AccessKey"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:iam::*:user/student"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+										"lambda:ListFunctions",
+										"cognito-idp:CreateUserPool",
+										"cognito-idp:List*",
+										"cognito-idp:Get*",
+										"dynamodb:*",
+										"s3:GetBucketLocation",
+										"s3:ListAllMyBuckets",
+										"s3:ListBucket",
+										"s3:ListBucketVersions",
+										"s3:GetObject",
+										"s3:GetObjectAcl",
+										"s3:CreateBucket",
+										"s3:PutObject",
+										"s3:PutBucketWebsite",
+										"s3:PutBucketPolicy",
+										"s3:GetBucketTagging",
+										"s3:GetBucketVersioning",
+										"s3:PutBucketTagging",
+										"s3:PutBucketCORS"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Deny",
+                                    "Action": [
+                                        "ec2:ModifyInstanceAttribute",
+                                        "ec2:*Reserved*",
+                                        "ec2:*Spot*",
+                                        "dynamodb:*Reserved*",
+                                        "rds:*Reserved*",
+                                        "elasticache:*Reserved*",
+                                        "redshift:*Reserved*",
+                                        "aws-marketplace:*"
+                                    ],
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "User": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "LoginProfile": {
+                    "Password": {
+                        "Fn::FindInMap": [
+                            "UserConfig",
+                            "Login",
+                            "Pass"
+                        ]
+                    }
+                },
+                "Path": "/",
+                "Groups": [
+                    "Students"
+                ],
+                "UserName": {
+                    "Fn::FindInMap": [
+                        "UserConfig",
+                        "Login",
+                        "Name"
+                    ]
+                }
             }
         }
     }
