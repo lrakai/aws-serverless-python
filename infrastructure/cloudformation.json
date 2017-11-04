@@ -440,6 +440,7 @@
                                         "dynamodb:*",
                                         "cloudwatch:DescribeAlarms",
                                         "cloudwatch:DeleteAlarms",
+                                        "cloudwatch:GetMetricStatistics",
                                         "cloudwatch:PutMetricAlarm",
                                         "application-autoscaling:DeleteScalingPolicy",
                                         "application-autoscaling:DeregisterScalableTarget",
