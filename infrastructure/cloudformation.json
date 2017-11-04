@@ -569,7 +569,11 @@
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-                                        "lambda:ListFunctions",
+                                        "lambda:Get*",
+                                        "lambda:List*",
+                                        "tag:getResources",
+                                        "kms:ListAliases",
+                                        "apigateway:GET",
                                         "cognito-idp:CreateUserPool",
                                         "cognito-idp:List*",
                                         "cognito-idp:Get*",
