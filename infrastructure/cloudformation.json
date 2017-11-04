@@ -135,14 +135,14 @@
                 "Path": "/",
                 "Policies": [
                     {
-                        "PolicyName": "iot-full-access",
+                        "PolicyName": "Sam Instance",
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-                                        "iot:*"
+                                        "s3:list*"
                                     ],
                                     "Resource": [
                                         "*"
@@ -161,6 +161,52 @@
                 "Roles": [
                     {
                         "Ref": "Ec2Role"
+                    }
+                ]
+            }
+        },
+        "DynamoDbScalingRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": "DynamoDbScalingRole",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "application-autoscaling.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "DynamoDB Scaling",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "dynamodb:DescribeTable",
+                                        "dynamodb:UpdateTable",
+                                        "cloudwatch:PutMetricAlarm",
+                                        "cloudwatch:DescribeAlarms",
+                                        "cloudwatch:DeleteAlarms"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                }
+                            ]
+                        }
                     }
                 ]
             }
@@ -356,6 +402,35 @@
                                     ]
                                 },
                                 {
+                                    "Action": [
+                                        "iam:ListRoles",
+                                        "iam:ListRolePolicies"
+                                    ],
+                                    "Resource": "*",
+                                    "Effect": "Allow"
+                                },
+                                {
+                                    "Action": [
+                                        "iam:PassRole"
+                                    ],
+                                    "Resource": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:iam::",
+                                                {
+                                                    "Ref": "AWS::AccountId"
+                                                },
+                                                ":role/",
+                                                {
+                                                    "Ref": "DynamoDbScalingRole"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    "Effect": "Allow"
+                                },
+                                {
                                     "Effect": "Allow",
                                     "Action": [
                                         "lambda:ListFunctions",
@@ -363,6 +438,13 @@
                                         "cognito-idp:List*",
                                         "cognito-idp:Get*",
                                         "dynamodb:*",
+                                        "cloudwatch:DescribeAlarms",
+                                        "cloudwatch:DeleteAlarms",
+                                        "application-autoscaling:DeleteScalingPolicy",
+                                        "application-autoscaling:DeregisterScalableTarget",
+                                        "application-autoscaling:Describe*",
+                                        "application-autoscaling:PutScalingPolicy",
+                                        "application-autoscaling:RegisterScalableTarget",
                                         "s3:GetBucketLocation",
                                         "s3:ListAllMyBuckets",
                                         "s3:ListBucket",
@@ -383,12 +465,30 @@
                                     ]
                                 },
                                 {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "sns:CreateTopic"
+                                    ],
+                                    "Resource": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:sns:us-west-2:",
+                                                {
+                                                    "Ref": "AWS::AccountId"
+                                                },
+                                                ":dynamodb"
+                                            ]
+                                        ]
+                                    }
+                                },
+                                {
                                     "Effect": "Deny",
                                     "Action": [
                                         "ec2:ModifyInstanceAttribute",
                                         "ec2:*Reserved*",
                                         "ec2:*Spot*",
-                                        "dynamodb:*Reserved*",
+                                        "dynamodb:Purchase*",
                                         "rds:*Reserved*",
                                         "elasticache:*Reserved*",
                                         "redshift:*Reserved*",
