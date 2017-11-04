@@ -441,6 +441,7 @@
                                         "cloudwatch:DescribeAlarms",
                                         "cloudwatch:DeleteAlarms",
                                         "cloudwatch:GetMetricStatistics",
+                                        "cloudwatch:ListMetrics",
                                         "cloudwatch:PutMetricAlarm",
                                         "application-autoscaling:DeleteScalingPolicy",
                                         "application-autoscaling:DeregisterScalableTarget",
