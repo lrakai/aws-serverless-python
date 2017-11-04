@@ -49,10 +49,10 @@
                     "Ref": "AWS::AccountId"
                 },
                 "SecurityGroupIds": [
-					{
-						"Ref": "Ec2SecurityGroup"
-					}
-				],
+                    {
+                        "Ref": "Ec2SecurityGroup"
+                    }
+                ],
                 "SubnetId": {
                     "Ref": "SubnetA"
                 },
@@ -75,39 +75,38 @@
                             [
                                 "#!/bin/bash -xe\n",
                                 "apt-get install git -y\n",
-								"cd /tmp/\n",
-								"git clone https://github.com/lrakai/ca-python-serverless\n",
-								"cd ca-python-serverless\n",
-								"git checkout -b lab\n",
-								"git pull origin lab\n",
-								"cd ..\n",
-								"tar -cf ca-python-serverless.tar --exclude \\.git* ca-python-serverless\n",
-								"tar -xf ca-python-serverless.tar -C /home/ubuntu/\n",
-								"chown -R ubuntu:ubuntu /home/ubuntu/\n",
-								"add-apt-repository ppa:jonathonf/python-3.6 --yes\n",
-								"apt-get update\n",
-								"apt-get install -y python3.6 python3.6-dev libssl-dev \n",
-								"apt-get install -y python3-pip virtualenv zip\n",
-								"cd /home/ubuntu/ca-python-serverless\n",
-								"virtualenv -p /usr/bin/python3.6 venv\n",
-								"source /home/ubuntu/ca-python-serverless/venv/bin/activate\n",
-								"pip install boto3 moto\n",
-								"pip install moto[server]\n",
-								"pip install -r requirements.txt\n",
-								"source /home/ubuntu/ca-python-serverless/venv/bin/activate\n",
-								"pip install awscli\n",
-								"mkdir -p /home/ubuntu/.aws\n",
-								"ln -s /home/ubuntu/ca-python-serverless/credentials /home/ubuntu/.aws/\n",
-								"echo \"source /home/ubuntu/ca-python-serverless/venv/bin/activate\" | sudo tee -a /etc/profile\n",
-								"grep -q -F 'PYTHONPATH=\"/home/ubuntu/ca-python-serverless:$PYTHONPATH\"' /etc/environment || echo 'PYTHONPATH=\"/home/ubuntu/ca-python-serverless:$PYTHONPATH\"' | sudo tee -a /etc/environment\n",
-								"cd ~\n",
-								"wget https://github.com/awslabs/aws-sam-local/releases/download/v0.2.2/sam_0.2.2_linux_amd64.deb\n",
-								"dpkg -i sam_0.2.2_linux_amd64.deb\n",
-								"apt-get -f install\n",
-								"curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -\n",
-								"add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"\n",
-								"apt-get update\n",
-								"apt-get install -y docker-ce\n"
+                                "cd /tmp/\n",
+                                "git clone https://github.com/lrakai/ca-python-serverless\n",
+                                "cd ca-python-serverless\n",
+                                "git checkout -b lab\n",
+                                "git pull origin lab\n",
+                                "cd ..\n",
+                                "tar -cf ca-python-serverless.tar --exclude \\.git* ca-python-serverless\n",
+                                "tar -xf ca-python-serverless.tar -C /home/ubuntu/\n",
+                                "chown -R ubuntu:ubuntu /home/ubuntu/\n",
+                                "add-apt-repository ppa:jonathonf/python-3.6 --yes\n",
+                                "apt-get update\n",
+                                "apt-get install -y python3.6 python3.6-dev libssl-dev \n",
+                                "apt-get install -y python3-pip virtualenv zip\n",
+                                "cd /home/ubuntu/ca-python-serverless\n",
+                                "virtualenv -p /usr/bin/python3.6 venv\n",
+                                "source /home/ubuntu/ca-python-serverless/venv/bin/activate\n",
+                                "pip install boto3 moto\n",
+                                "pip install moto[server]\n",
+                                "source /home/ubuntu/ca-python-serverless/venv/bin/activate\n",
+                                "pip install awscli\n",
+                                "mkdir -p /home/ubuntu/.aws\n",
+                                "ln -s /home/ubuntu/ca-python-serverless/credentials /home/ubuntu/.aws/\n",
+                                "echo \"source /home/ubuntu/ca-python-serverless/venv/bin/activate\" | sudo tee -a /etc/profile\n",
+                                "grep -q -F 'PYTHONPATH=\"/home/ubuntu/ca-python-serverless:$PYTHONPATH\"' /etc/environment || echo 'PYTHONPATH=\"/home/ubuntu/ca-python-serverless:$PYTHONPATH\"' | sudo tee -a /etc/environment\n",
+                                "cd ~\n",
+                                "wget https://github.com/awslabs/aws-sam-local/releases/download/v0.2.2/sam_0.2.2_linux_amd64.deb\n",
+                                "dpkg -i sam_0.2.2_linux_amd64.deb\n",
+                                "apt-get -f install\n",
+                                "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -\n",
+                                "add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"\n",
+                                "apt-get update\n",
+                                "apt-get install -y docker-ce\n"
                             ]
                         ]
                     }
@@ -164,6 +163,40 @@
                         "Ref": "Ec2Role"
                     }
                 ]
+            }
+        },
+        "SamBucket": {
+            "Type": "AWS::S3::Bucket"
+        },
+        "SamBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "SamBucket"
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "s3:*"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        {
+                                            "Ref": "SamBucket"
+                                        },
+                                        "/*"
+                                    ]
+                                ]
+                            },
+                            "Principal": "*"
+                        }
+                    ]
+                }
             }
         },
         "VPC": {
@@ -325,25 +358,25 @@
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-										"lambda:ListFunctions",
-										"cognito-idp:CreateUserPool",
-										"cognito-idp:List*",
-										"cognito-idp:Get*",
-										"dynamodb:*",
-										"s3:GetBucketLocation",
-										"s3:ListAllMyBuckets",
-										"s3:ListBucket",
-										"s3:ListBucketVersions",
-										"s3:GetObject",
-										"s3:GetObjectAcl",
-										"s3:CreateBucket",
-										"s3:PutObject",
-										"s3:PutBucketWebsite",
-										"s3:PutBucketPolicy",
-										"s3:GetBucketTagging",
-										"s3:GetBucketVersioning",
-										"s3:PutBucketTagging",
-										"s3:PutBucketCORS"
+                                        "lambda:ListFunctions",
+                                        "cognito-idp:CreateUserPool",
+                                        "cognito-idp:List*",
+                                        "cognito-idp:Get*",
+                                        "dynamodb:*",
+                                        "s3:GetBucketLocation",
+                                        "s3:ListAllMyBuckets",
+                                        "s3:ListBucket",
+                                        "s3:ListBucketVersions",
+                                        "s3:GetObject",
+                                        "s3:GetObjectAcl",
+                                        "s3:CreateBucket",
+                                        "s3:PutObject",
+                                        "s3:PutBucketWebsite",
+                                        "s3:PutBucketPolicy",
+                                        "s3:GetBucketTagging",
+                                        "s3:GetBucketVersioning",
+                                        "s3:PutBucketTagging",
+                                        "s3:PutBucketCORS"
                                     ],
                                     "Resource": [
                                         "*"
