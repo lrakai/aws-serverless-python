@@ -142,11 +142,92 @@
                                 {
                                     "Effect": "Allow",
                                     "Action": [
-                                        "s3:list*"
+                                        "s3:list*",
+                                        "iam:ListRoles"
                                     ],
                                     "Resource": [
                                         "*"
                                     ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "lambda:CreateFunction"
+                                    ],
+                                    "Resource": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:lambda:us-west-2:",
+                                                {
+                                                    "Ref": "AWS::AccountId"
+                                                },
+                                                ":function:*"
+                                            ]
+                                        ]
+                                    }
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:PassRole"
+                                    ],
+                                    "Resource": {
+                                        "Ref": "SamExecutionRole"
+                                    }
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "apigateway:POST"
+                                    ],
+                                    "Resource": "arn:aws:apigateway:us-west-2::/restapis"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "apigateway:GET",
+                                        "apigateway:POST",
+                                        "apigateway:PATCH",
+                                        "apigateway:DELETE"
+                                    ],
+                                    "Resource": "arn:aws:apigateway:us-west-2::/restapis/*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudformation:CreateStack",
+                                        "cloudformation:CreateChangeSet",
+                                        "cloudformation:DescribeChangeSet",
+                                        "cloudformation:DescribeStackEvents",
+                                        "cloudformation:DescribeStackResource",
+                                        "cloudformation:DescribeStackResources",
+                                        "cloudformation:DescribeStacks",
+                                        "cloudformation:ExecuteChangeSet",
+                                        "cloudformation:GetStackPolicy",
+                                        "cloudformation:GetTemplate",
+                                        "cloudformation:GetTemplateSummary",
+                                        "cloudformation:ListStackResources"
+                                    ],
+                                    "Resource": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:cloudformation:us-west-2:",
+                                                {
+                                                    "Ref": "AWS::AccountId"
+                                                },
+                                                ":stack/TodoServerlessAPI/*"
+                                            ]
+                                        ]
+                                    }
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudformation:CreateChangeSet"
+                                    ],
+                                    "Resource": "arn:aws:cloudformation:us-west-2:aws:transform/Serverless-2016-10-31"
                                 }
                             ]
                         }
@@ -211,9 +292,10 @@
                 ]
             }
         },
-        "GetFunctionRole": {
+        "SamExecutionRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
+                "RoleName": "SamExecutionRole",
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": [
@@ -233,7 +315,7 @@
                 "Path": "/",
                 "Policies": [
                     {
-                        "PolicyName": "GET function",
+                        "PolicyName": "SAM function actions",
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [
@@ -241,7 +323,10 @@
                                     "Effect": "Allow",
                                     "Action": [
                                         "dynamodb:GetItem",
-                                        "dynamodb:Query"
+                                        "dynamodb:Query",
+                                        "dynamodb:PutItem",
+                                        "dynamodb:UpdateItem",
+                                        "dynamodb:DeleteItem"
                                     ],
                                     "Resource": {
                                         "Fn::Join": [
