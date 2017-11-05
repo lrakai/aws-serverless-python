@@ -173,7 +173,10 @@
                                         "iam:PassRole"
                                     ],
                                     "Resource": {
-                                        "Ref": "SamExecutionRole"
+                                        "Fn::GetAtt": [
+                                            "SamExecutionRole",
+                                            "Arn"
+                                        ]
                                     }
                                 },
                                 {
@@ -575,8 +578,13 @@
                                         "kms:ListAliases",
                                         "apigateway:GET",
                                         "cognito-idp:CreateUserPool",
+                                        "cognito-idp:CreateUserPoolClient",
                                         "cognito-idp:List*",
                                         "cognito-idp:Get*",
+                                        "cognito-idp:Describe*",
+                                        "cognito-idp:UpdateUserPool",
+                                        "cognito-idp:UpdateUserPoolClient",
+                                        "cognito-idp:Admin*",
                                         "dynamodb:*",
                                         "cloudwatch:DescribeAlarms",
                                         "cloudwatch:DeleteAlarms",
