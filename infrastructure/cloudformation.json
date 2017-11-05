@@ -135,7 +135,7 @@
                 "Path": "/",
                 "Policies": [
                     {
-                        "PolicyName": "Sam Instance",
+                        "PolicyName": "Sam-Instance",
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [
@@ -269,7 +269,7 @@
                 "Path": "/",
                 "Policies": [
                     {
-                        "PolicyName": "DynamoDB Scaling",
+                        "PolicyName": "DynamoDB-Scaling",
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [
@@ -315,7 +315,7 @@
                 "Path": "/",
                 "Policies": [
                     {
-                        "PolicyName": "SAM function actions",
+                        "PolicyName": "SAM-function-actions",
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [
