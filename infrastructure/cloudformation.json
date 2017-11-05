@@ -19,7 +19,7 @@
         },
         "Ec2InstanceConfig": {
             "Metadata": {
-                "InstanceName": "Dev Instance"
+                "InstanceName": "Dev (SSH User: ubuntu)"
             }
         },
         "UserConfig": {
@@ -44,7 +44,7 @@
                     "Ref": "Ec2InstanceProfile"
                 },
                 "ImageId": "ami-6e1a0117",
-                "InstanceType": "t2.medium",
+                "InstanceType": "t2.micro",
                 "KeyName": {
                     "Ref": "AWS::AccountId"
                 },
