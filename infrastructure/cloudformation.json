@@ -580,6 +580,7 @@
                                         "kms:ListAliases",
                                         "apigateway:GET",
 										"apigateway:PATCH",
+										"apigateway:PUT",
 										"apigateway:POST",
                                         "cognito-idp:CreateUserPool",
                                         "cognito-idp:CreateUserPoolClient",
