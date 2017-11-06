@@ -143,7 +143,9 @@
                                     "Effect": "Allow",
                                     "Action": [
                                         "s3:list*",
-                                        "iam:ListRoles"
+                                        "iam:ListRoles",
+										"lambda:Get*",
+										"lambda:AddPermission"
                                     ],
                                     "Resource": [
                                         "*"
