@@ -143,9 +143,11 @@
                                     "Effect": "Allow",
                                     "Action": [
                                         "s3:list*",
+                                        "s3:PutBucketWebsite",
+                                        "s3:PutObject",
                                         "iam:ListRoles",
-										"lambda:Get*",
-										"lambda:AddPermission"
+                                        "lambda:Get*",
+                                        "lambda:AddPermission"
                                     ],
                                     "Resource": [
                                         "*"
@@ -579,9 +581,9 @@
                                         "tag:getResources",
                                         "kms:ListAliases",
                                         "apigateway:GET",
-										"apigateway:PATCH",
-										"apigateway:PUT",
-										"apigateway:POST",
+                                        "apigateway:PATCH",
+                                        "apigateway:PUT",
+                                        "apigateway:POST",
                                         "cognito-idp:CreateUserPool",
                                         "cognito-idp:CreateUserPoolClient",
                                         "cognito-idp:List*",
